@@ -1,4 +1,4 @@
-def parse_mtl_file(filename):
+def parse_metadata(filename):
 	"""Parses a Landsat metadata file and returns a hierarchical dict with all of the metadata.
 
 	The metadata file is the file that is named <SCENEID>_MTL.txt - for example LE72020252002087EDC00_MTL.txt
