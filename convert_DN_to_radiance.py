@@ -35,7 +35,7 @@ def get_radiance_scaling(filename):
 
 	return map(float, radiance_mult), map(float, radiance_add)
 
-def create_radiance_images(rootname, outputname):
+def create_radiance_image(rootname, outputname):
 	mtl_filename = rootname + "_MTL.txt"
 	radiance_mult, radiance_add = get_radiance_scaling(mtl_filename)
 
@@ -72,4 +72,4 @@ def create_all_radiance_images():
 	for f in files:
 		rootname = f[0:-7]
 
-		create_radiance_images(rootname, rootname + "_Radiance.tif")
+		create_radiance_image(rootname, rootname + "_Radiance.tif")
