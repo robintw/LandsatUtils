@@ -46,6 +46,11 @@ class BOAReflectance:
 		# ASSUMPTION: Setting altitude to sea level, even though that isn't necessarily correct everywhere
 		s.altitudes.set_target_sea_level()
 
+		# Set to have no aerosols
+		s.aero_profile = AeroProfile.PredefinedType(AeroProfile.NoAerosols)
+		s.altitudes.set_sensor_satellite_level()
+		s.altitudes.set_target_sea_level()
+
 		radiances = np.arange(0, 300, 10)
 
 		B1 = []
