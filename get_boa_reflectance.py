@@ -10,8 +10,9 @@ from scipy.interpolate import interp1d
 
 class BOAReflectance:
 
-	def __init__(self, metadata_fname):
+	def __init__(self, metadata_fname, scale=1):
 		self.metadata = parse_metadata(metadata_fname)
+		self.scale = scale
 
 	def _process_band(self, s, radiance, wavelength):
 		s.wavelength = Wavelength(wavelength)
@@ -94,12 +95,12 @@ class BOAReflectance:
 		B7 = np.array(B7)
 
 		self.lut = [None,
-		            interp1d(radiances, B1, bounds_error=False),
-		            interp1d(radiances, B2, bounds_error=False),
-		            interp1d(radiances, B3, bounds_error=False),
-		            interp1d(radiances, B4, bounds_error=False),
-		            interp1d(radiances, B5, bounds_error=False),
-		            interp1d(radiances, B7, bounds_error=False)]
+		            interp1d(radiances * self.scale, B1, bounds_error=False),
+		            interp1d(radiances * self.scale, B2, bounds_error=False),
+		            interp1d(radiances * self.scale, B3, bounds_error=False),
+		            interp1d(radiances * self.scale, B4, bounds_error=False),
+		            interp1d(radiances * self.scale, B5, bounds_error=False),
+		            interp1d(radiances * self.scale, B7, bounds_error=False)]
 
 		print "Created LUT"
 
