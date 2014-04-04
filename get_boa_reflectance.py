@@ -55,18 +55,31 @@ class BOAReflectance:
 		B5 = []
 		B7 = []
 
-		s.aero_profile = AeroProfile.PredefinedType(AeroProfile.NoAerosols)
-		s.altitudes.set_sensor_satellite_level()
-		s.altitudes.set_target_sea_level()
+		if self.metadata['PRODUCT_METADATA']['SENSOR_ID'].replace("\"", "") == 'TM':
+			print "Running as Landsat 5"
+			bands = [PredefinedWavelengths.LANDSAT_TM_B1,
+					PredefinedWavelengths.LANDSAT_TM_B2,
+					PredefinedWavelengths.LANDSAT_TM_B3,
+					PredefinedWavelengths.LANDSAT_TM_B4,
+					PredefinedWavelengths.LANDSAT_TM_B5,
+					PredefinedWavelengths.LANDSAT_TM_B7]
+		else:
+			print "Running as Landsat 7"
+			bands = [PredefinedWavelengths.LANDSAT_ETM_B1,
+					PredefinedWavelengths.LANDSAT_ETM_B2,
+					PredefinedWavelengths.LANDSAT_ETM_B3,
+					PredefinedWavelengths.LANDSAT_ETM_B4,
+					PredefinedWavelengths.LANDSAT_ETM_B5,
+					PredefinedWavelengths.LANDSAT_ETM_B7]
 
 		for rad in radiances:
 			print rad
-			B1.append(self._process_band(s, rad, PredefinedWavelengths.LANDSAT_ETM_B1))
-			B2.append(self._process_band(s, rad, PredefinedWavelengths.LANDSAT_ETM_B2))
-			B3.append(self._process_band(s, rad, PredefinedWavelengths.LANDSAT_ETM_B3))
-			B4.append(self._process_band(s, rad, PredefinedWavelengths.LANDSAT_ETM_B4))
-			B5.append(self._process_band(s, rad, PredefinedWavelengths.LANDSAT_ETM_B5))
-			B7.append(self._process_band(s, rad, PredefinedWavelengths.LANDSAT_ETM_B7))
+			B1.append(self._process_band(s, rad, bands[0]))
+			B2.append(self._process_band(s, rad, bands[1]))
+			B3.append(self._process_band(s, rad, bands[2]))
+			B4.append(self._process_band(s, rad, bands[3]))
+			B5.append(self._process_band(s, rad, bands[4]))
+			B7.append(self._process_band(s, rad, bands[5]))
 
 		B1 = np.array(B1)
 		B2 = np.array(B2)
