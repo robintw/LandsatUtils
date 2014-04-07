@@ -18,7 +18,7 @@ n = 9
 
 
 # Get the list of AERONET stations from 2009
-stations = get_stations("aeronet_locations_2009_lev15.txt")
+stations = get_stations("aeronet_locations_2002_lev15.txt")
 
 # Get the path and row locations for each lat/lon
 paths_and_rows = stations.apply(get_path_and_row, axis=1)
@@ -94,9 +94,6 @@ def nothing_if_not_full(x, n):
 g = res.groupby('name')        
 res = g.apply(nothing_if_not_full, n)
 
-# Remove the HJAndrews site, as it is cloudy near to the 9 x 9 region over the AERONET site, and therefore
-# cloud shadows may cause problems
 g = res.groupby('name')        
-res.drop(g.get_group('HJAndrews').index)
 
-res.to_csv("LandsatAeronet_n9_beforeManualLC.txt")
+res.to_csv("LandsatAeronet_L7_LongTimeSeries_n9_beforeManualLC.txt")
