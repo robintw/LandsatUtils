@@ -17,6 +17,8 @@ GEOGCS["WGS 84",
     AUTHORITY["EPSG","4326"]]"""
 
 def split_and_get_details(line):
+	if "VCID" in line:
+		return 6, None
 	split = [x.strip() for x in line.split("=")]
 	band = int(split[0][-1])
 	factor = float(split[1])
@@ -43,6 +45,7 @@ def get_radiance_scaling(filename):
 		add_band, add_factor = split_and_get_details(add_line)
 		radiance_add[add_band - 1] = add_factor
 
+	print radiance_mult, radiance_add
 	return radiance_mult, radiance_add
 
 def read_landsat_image(sceneID, lat, lon, n):
