@@ -22,14 +22,17 @@ def setup_sixs_object(aot, aeronet_file, PWC, ozone, lat, lon, elev, timestamp):
 	s.atmos_profile = AtmosProfile.UserWaterAndOzone(PWC, ozone/1000)
 	s.aot550 = aot
 
-	s.geometry = Geometry.Landsat_TM()
-	s.geometry.latitude = lat
-	s.geometry.longitude = lon
+	# s.geometry = Geometry.Landsat_TM()
+	# s.geometry.latitude = lat
+	# s.geometry.longitude = lon
 	
-	# Set day, month and gmt_decimal_hour here from timestamp
-	s.geometry.day = timestamp.day
-	s.geometry.month = timestamp.month
-	s.geometry.gmt_decimal_hour = timestamp.hour + (timestamp.minute / 60.0)
+	# # Set day, month and gmt_decimal_hour here from timestamp
+	# s.geometry.day = timestamp.day
+	# s.geometry.month = timestamp.month
+	# s.geometry.gmt_decimal_hour = timestamp.hour + (timestamp.minute / 60.0)
+
+	s.geometry = Geometry.User()
+	s.geometry.from_time_and_location(lat, lon, timestamp.strftime("%H:%M"), 0, 0)
 
 	s.altitudes.set_sensor_satellite_level()
 	s.altitudes.set_target_custom_altitude(elev / 1000.0)
