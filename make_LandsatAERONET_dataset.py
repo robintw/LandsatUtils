@@ -57,8 +57,8 @@ corrected_pixels = grouped.apply(get_land_cover_for_stations,
 	n=n)
 
 # Get the view angles (azimuth and zenith) for each site
-grouped = corrected_pixels.groupby('name')
-corrected_pixels = grouped.apply(insert_view_angles, n=n)
+# grouped = corrected_pixels.groupby('name')
+# corrected_pixels = grouped.apply(insert_view_angles, n=n)
 
 # Get the radiance for each site in a clean atmosphere
 interp = create_lut_interpolators()
@@ -74,7 +74,7 @@ corrected_pixels['B7R'] = interp['B7'](corrected_pixels.B7)
 # Remove all sites which don't have full data available for them
 # This includes some sites which have Band X radiance results
 # which are NaN because the corrected reflectance was < 0 or > 1.
-res = corrected_pixels.dropna(subset=['B1', 'viewZenith', 'B1R', 'B2R', 'B3R', 'B4R', 'B5R', 'B7R'])
+res = corrected_pixels.dropna(subset=['B1', 'B1R', 'B2R', 'B3R', 'B4R', 'B5R', 'B7R'])
 
 
 # Some of the NLCD values are 0, which are for areas which are inside the NLCD image but outside
