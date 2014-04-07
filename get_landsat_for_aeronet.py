@@ -8,7 +8,7 @@ from get_wrs import *
 conv = ConvertToWRS()
 
 import sqlite3
-conn = sqlite3.connect("./TM_Metadata.sqlite.s3db")
+conn = sqlite3.connect("./ETM_Metadata.s3db")
 conn.row_factory = sqlite3.Row
 
 def get_path_and_row(s):
@@ -42,9 +42,19 @@ def get_landsat_metadata(path, row, date_str):
 
 	cur = conn.cursor()
 
-	cur.execute("SELECT * FROM images WHERE path=%d AND row=%d "
-		"AND acquisitionDate > date('%s','-6 month') AND acquisitionDate < date('%s','+6 month')"
-		"ORDER BY cloudCoverFull ASC;" % (path, row, date_str, date_str))
+	# cur.execute("SELECT * FROM images WHERE path=%d AND row=%d "
+	# 	"AND acquisitionDate > date('%s','-6 month') AND acquisitionDate < date('%s','+6 month')"
+	# 	"ORDER BY cloudCoverFull ASC;" % (path, row, date_str, date_str))
+
+
+	sql = "SELECT * FROM images WHERE path=%d AND row=%d " \
+	"AND acquisitionDate > date('2000-01-01') AND acquisitionDate < date('2003-04-30')" \
+	"ORDER BY cloudCoverFull ASC;" % (path, row)
+
+	print sql
+	cur.execute(sql)
+
+
 
 	res = cur.fetchall()
 
