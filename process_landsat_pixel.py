@@ -49,13 +49,13 @@ def process_landsat_pixel(s, radiance, band):
 	Return value: a list of atmospherically-corrected reflectances for the given pixel.
 	"""
 	
-	s.wavelength = Wavelength(eval("PredefinedWavelengths.LANDSAT_TM_%s" % band))
+	s.wavelength = Wavelength(eval("PredefinedWavelengths.LANDSAT_ETM_%s" % band))
 	s.atmos_corr = AtmosCorr.AtmosCorrLambertianFromRadiance(radiance)
 
 	s.run()
-	#print s.write_input_file()
-	#print s.outputs.values
-	#print s.outputs.atmos_corrected_reflectance_lambertian
+	print s.write_input_file()
+	print s.outputs.values
+	print s.outputs.atmos_corrected_reflectance_lambertian
 	return s.outputs.atmos_corrected_reflectance_lambertian
 
 def myround(x):

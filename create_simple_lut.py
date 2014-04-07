@@ -23,12 +23,12 @@ def create_simple_lut():
 
 	for refl in refls:
 		print refl
-		B1.append(process_band(s, PredefinedWavelengths.LANDSAT_TM_B1, refl))
-		B2.append(process_band(s, PredefinedWavelengths.LANDSAT_TM_B2, refl))
-		B3.append(process_band(s, PredefinedWavelengths.LANDSAT_TM_B3, refl))
-		B4.append(process_band(s, PredefinedWavelengths.LANDSAT_TM_B4, refl))
-		B5.append(process_band(s, PredefinedWavelengths.LANDSAT_TM_B5, refl))
-		B7.append(process_band(s, PredefinedWavelengths.LANDSAT_TM_B7, refl))
+		B1.append(process_band(s, PredefinedWavelengths.LANDSAT_ETM_B1, refl))
+		B2.append(process_band(s, PredefinedWavelengths.LANDSAT_ETM_B2, refl))
+		B3.append(process_band(s, PredefinedWavelengths.LANDSAT_ETM_B3, refl))
+		B4.append(process_band(s, PredefinedWavelengths.LANDSAT_ETM_B4, refl))
+		B5.append(process_band(s, PredefinedWavelengths.LANDSAT_ETM_B5, refl))
+		B7.append(process_band(s, PredefinedWavelengths.LANDSAT_ETM_B7, refl))
 
 	B1 = np.array(B1)
 	B2 = np.array(B2)
