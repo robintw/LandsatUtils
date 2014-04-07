@@ -28,7 +28,7 @@ stations = pd.merge(stations, paths_and_rows, left_index=True, right_index=True)
 # times when a Landsat image and an AERONET measurement are within
 # 15 minutes of each other.
 # Look throughout the whole of 2009 (+/- 6 months from 1st July 2009)
-stations = insert_landsat_details(stations, "2009-07-01", 15)
+stations = insert_landsat_details(stations, "2002-07-01", 15)
 
 # Subset to just the stations that have all of the data
 stations = stations.dropna()
