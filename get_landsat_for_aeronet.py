@@ -23,7 +23,9 @@ def get_path_and_row(s):
 
 def get_stations(filename):
 	"""Get the original stations list from the file from the AERONET website."""
-	df = pd.read_csv(filename, header=None, names=['name', 'lon', 'lat', 'elev'], skiprows=2)
+	df = pd.read_csv("aeronet_locations_2002_lev15.txt", header=None, names=['name', 'lon', 'lat', 'elev', 'JAN','FEB','MAR','APR','MAY','JUN','JUL','AUG','SEP','OCT','NOV','DEC'], skiprows=2, sep=",")
+	df = df.ix[:, ['name', 'lon', 'lat', 'elev']]
+
 
 	return df
 
