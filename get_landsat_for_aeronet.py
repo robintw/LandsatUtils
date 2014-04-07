@@ -8,7 +8,7 @@ from get_wrs import *
 conv = ConvertToWRS()
 
 import sqlite3
-conn = sqlite3.connect("./ETM_SLCOFF.sqlite")
+conn = sqlite3.connect("./TM_Metadata.sqlite.s3db")
 conn.row_factory = sqlite3.Row
 
 def get_path_and_row(s):
@@ -23,9 +23,7 @@ def get_path_and_row(s):
 
 def get_stations(filename):
 	"""Get the original stations list from the file from the AERONET website."""
-	df = pd.read_csv(filename, header=None, names=['name', 'lon', 'lat', 'elev', 'JAN','FEB','MAR','APR','MAY','JUN','JUL','AUG','SEP','OCT','NOV','DEC'], skiprows=2, sep=",")
-	df = df.ix[:, ['name', 'lon', 'lat', 'elev']]
-
+	df = pd.read_csv(filename, header=None, names=['name', 'lon', 'lat', 'elev'], skiprows=2)
 
 	return df
 
@@ -44,19 +42,9 @@ def get_landsat_metadata(path, row, date_str):
 
 	cur = conn.cursor()
 
-	# cur.execute("SELECT * FROM images WHERE path=%d AND row=%d "
-	# 	"AND acquisitionDate > date('%s','-6 month') AND acquisitionDate < date('%s','+6 month')"
-	# 	"ORDER BY cloudCoverFull ASC;" % (path, row, date_str, date_str))
-
-
-	sql = "SELECT * FROM images WHERE path=%d AND row=%d " \
-	"AND acquisitionDate > date('2003-06-01') AND acquisitionDate < date('2013-12-31')" \
-	"ORDER BY cloudCoverFull ASC;" % (path, row)
-
-	print sql
-	cur.execute(sql)
-
-
+	cur.execute("SELECT * FROM images WHERE path=%d AND row=%d "
+		"AND acquisitionDate > date('%s','-6 month') AND acquisitionDate < date('%s','+6 month')"
+		"ORDER BY cloudCoverFull ASC;" % (path, row, date_str, date_str))
 
 	res = cur.fetchall()
 

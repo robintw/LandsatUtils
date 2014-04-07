@@ -18,7 +18,7 @@ n = 9
 
 
 # Get the list of AERONET stations from 2009
-stations = get_stations("aeronet_locations_2013_lev15.txt")
+stations = get_stations("aeronet_locations_2009_lev15.txt")
 
 # Get the path and row locations for each lat/lon
 paths_and_rows = stations.apply(get_path_and_row, axis=1)
@@ -28,7 +28,7 @@ stations = pd.merge(stations, paths_and_rows, left_index=True, right_index=True)
 # times when a Landsat image and an AERONET measurement are within
 # 15 minutes of each other.
 # Look throughout the whole of 2009 (+/- 6 months from 1st July 2009)
-stations = insert_landsat_details(stations, "2002-07-01", 15)
+stations = insert_landsat_details(stations, "2009-07-01", 15)
 
 # Subset to just the stations that have all of the data
 stations = stations.dropna()
@@ -57,8 +57,8 @@ corrected_pixels = grouped.apply(get_land_cover_for_stations,
 	n=n)
 
 # Get the view angles (azimuth and zenith) for each site
-# grouped = corrected_pixels.groupby('name')
-# corrected_pixels = grouped.apply(insert_view_angles, n=n)
+grouped = corrected_pixels.groupby('name')
+corrected_pixels = grouped.apply(insert_view_angles, n=n)
 
 # Get the radiance for each site in a clean atmosphere
 interp = create_lut_interpolators()
@@ -74,7 +74,7 @@ corrected_pixels['B7R'] = interp['B7'](corrected_pixels.B7)
 # Remove all sites which don't have full data available for them
 # This includes some sites which have Band X radiance results
 # which are NaN because the corrected reflectance was < 0 or > 1.
-res = corrected_pixels.dropna(subset=['B1', 'B1R', 'B2R', 'B3R', 'B4R', 'B5R', 'B7R'])
+res = corrected_pixels.dropna(subset=['B1', 'viewZenith', 'B1R', 'B2R', 'B3R', 'B4R', 'B5R', 'B7R'])
 
 
 # Some of the NLCD values are 0, which are for areas which are inside the NLCD image but outside
@@ -94,6 +94,9 @@ def nothing_if_not_full(x, n):
 g = res.groupby('name')        
 res = g.apply(nothing_if_not_full, n)
 
+# Remove the HJAndrews site, as it is cloudy near to the 9 x 9 region over the AERONET site, and therefore
+# cloud shadows may cause problems
 g = res.groupby('name')        
+res.drop(g.get_group('HJAndrews').index)
 
-res.to_csv("LandsatAeronet_L7_LongTimeSeries_n9_beforeManualLC.txt")
+res.to_csv("LandsatAeronet_n9_beforeManualLC.txt")
