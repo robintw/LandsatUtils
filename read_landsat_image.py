@@ -2,7 +2,7 @@ import gdal, gdalconst
 from path import path
 import osr
 
-basepath = path(r"E:\_Datastore\LandsatAERONET")
+basepath = path(r"L:\LandsatAERONET_L7")
 
 wgs84_wkt = """
 GEOGCS["WGS 84",
