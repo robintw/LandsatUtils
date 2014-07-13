@@ -9,7 +9,7 @@ from mask import mask_all_bands
 
 import logging
 
-def extract_and_process_uncorrected(uncorrected_fname, path):
+def extract_and_process_uncorrected(uncorrected_fname, path, output_name="Uncorrected_Merged.tif"):
 	logging.basicConfig(format='%(asctime)s:%(levelname)s:%(message)s', datefmt='%H:%M:%S', level=logging.DEBUG)
 	# ledaps_fname = r"E:\_Datastore\LandsatCDR\_Originals\LE71790772000097-SC20130626081016.tar.gz"
 	# uncorrected_fname = r"E:\_Datastore\LandsatCDR\_Originals\LE71790772000097EDC01.tar.gz"
@@ -34,7 +34,7 @@ def extract_and_process_uncorrected(uncorrected_fname, path):
 
 	logging.info("Merging uncorrected images")
 	# Create a merged radiance image from the raw DN tif files
-	create_radiance_image(os.path.join(path, rootname), os.path.join(path,"Uncorrected_Merged.tif"))
+	create_radiance_image(os.path.join(path, rootname), os.path.join(path, output_name))
 
 	os.chdir(prev_working_dir)
 
@@ -66,7 +66,7 @@ def extract_and_process(ledaps_fname, uncorrected_fname, path):
 
 	logging.info("Merging uncorrected images")
 	# Create a merged radiance image from the raw DN tif files
-	create_radiance_image(os.path.join(path, rootname), os.path.join(path,"Uncorrected_Merged.tif"))
+	create_radiance_images(os.path.join(path, rootname), os.path.join(path,"Uncorrected_Merged.tif"))
 
 	logging.info("Extracting masks from LEDAPS file")
 	# Extract the masks from the LEDAPS lndsr*.hdf file
@@ -106,6 +106,6 @@ def extract_and_process(ledaps_fname, uncorrected_fname, path):
 	logging.info("Removing temporary files")
 	all_files = glob(os.path.join(path, "*.*"))
 	for f in all_files:
-		if not "Final" in f and not "Water" in f and not "Cloud" in f and not "MTL" in f:
+		if not "Final" in f and not "Water" in f and not "Cloud" in f:
 			logging.debug("Removing %s", f)
 			os.remove(f)
