@@ -1,5 +1,6 @@
 import sys
 sys.path.append(r"C:\Dropbox\Dropbox\_PhD\_Code\PythonLibs")
+# sys.path.append(r"/Users/robin/Dropbox/_PhD/_Code/PythonLibs")
 
 from LandsatUtils import parse_metadata
 from Py6S import *
@@ -7,31 +8,45 @@ import numpy as np
 import dateutil
 from VanHOzone import get_ozone_conc
 from scipy.interpolate import interp1d
+from functools import wraps
+
+
 
 class BOAReflectance:
+	cache = {}
 
 	def __init__(self, metadata_fname, scale=1):
+		self.metadata_filename = metadata_fname
 		self.metadata = parse_metadata(metadata_fname)
 		self.scale = scale
 
 	def _process_band(self, s, radiance, wavelength):
 		s.wavelength = Wavelength(wavelength)
 		s.atmos_corr = AtmosCorr.AtmosCorrLambertianFromRadiance(radiance)
+
 		s.run()
 		return s.outputs.atmos_corrected_reflectance_lambertian
 
 	def create_lut(self):
+		if self.metadata_filename in BOAReflectance.cache:
+			self.lut = BOAReflectance.cache[self.metadata_filename]
+			print "Got from cache"
+			return
+
 		s = SixS()
 
 		str_timestamp = self.metadata['PRODUCT_METADATA']['DATE_ACQUIRED'] + " " + self.metadata['PRODUCT_METADATA']['SCENE_CENTER_TIME']
 		timestamp = dateutil.parser.parse(str_timestamp)
+		print timestamp
 
 		lat = float(self.metadata['PRODUCT_METADATA']['CORNER_UL_LAT_PRODUCT'])
 		lon = float(self.metadata['PRODUCT_METADATA']['CORNER_UL_LON_PRODUCT'])
-
+		print lat, lon
 		ozone = get_ozone_conc([lat], [lon], timestamp)
 		# Assume no water content - won't affect visible bands anyway
 		PWC = 0
+
+		print ozone
 		s.atmos_profile = AtmosProfile.UserWaterAndOzone(PWC, ozone/1000)
 
 		s.geometry = Geometry.Landsat_TM()
@@ -102,6 +117,7 @@ class BOAReflectance:
 		            interp1d(radiances * self.scale, B5, bounds_error=False),
 		            interp1d(radiances * self.scale, B7, bounds_error=False)]
 
+		BOAReflectance.cache[self.metadata_filename] = self.lut
 		print "Created LUT"
 
 	def correct_band(self, arr, band):
