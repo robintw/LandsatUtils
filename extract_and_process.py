@@ -9,11 +9,14 @@ from mask import mask_all_bands
 
 import logging
 
-def extract_and_process_uncorrected(uncorrected_fname, path, output_name="Uncorrected_Merged.tif"):
+def extract_and_process_uncorrected(uncorrected_fname, path=None, output_name="Uncorrected_Merged.tif"):
 	logging.basicConfig(format='%(asctime)s:%(levelname)s:%(message)s', datefmt='%H:%M:%S', level=logging.DEBUG)
 	# ledaps_fname = r"E:\_Datastore\LandsatCDR\_Originals\LE71790772000097-SC20130626081016.tar.gz"
 	# uncorrected_fname = r"E:\_Datastore\LandsatCDR\_Originals\LE71790772000097EDC01.tar.gz"
 	# path = "E:\_Datastore\LandsatCDR\TestAutomatic"
+
+	if path is None:
+		path = uncorrected_fname.replace('.tar.gz', '')
 
 
 	logging.info("Processing image with scene ID = %s to %s", os.path.basename(uncorrected_fname).replace(".tar.gz", ""), path)
