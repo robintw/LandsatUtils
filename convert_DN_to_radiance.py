@@ -4,9 +4,6 @@ import os
 from parse_metadata import parse_metadata
 import logging
 
-logging.basicConfig(level=logging.DEBUG)
-
-
 def get_radiance_scaling(filename):
     """Gets scaling factors to convert from DN to radiance for *all*
     Landsat bands (including thermal bands), from the given MTL file.
@@ -101,6 +98,20 @@ def get_radiance_scaling(filename):
 
 
 def create_radiance_image(rootname, outputname):
+    """Creates a GeoTIFF layerstacked radiance image from a Landsat scene.
+
+    Parameters:
+
+    rootname:
+        Full path and base name for all Landsat files. For example:
+        /path/to/folder/LC820219520150703ED00
+        (the path can then have '_MTL.txt' added for the metadata, '_B1.TIF'
+        added for band 1, etc.
+
+    outputname:
+        Full filename for the output file, in GeoTIFF format
+
+    """
     mtl_filename = rootname + "_MTL.txt"
 
     # Get the radiance scaling factors
