@@ -5,6 +5,7 @@ import dateutil
 from VanHOzone import get_ozone_conc
 from scipy.interpolate import interp1d
 from functools import wraps
+import logging
 
 
 class BOAReflectance:
@@ -22,29 +23,24 @@ class BOAReflectance:
         s.run()
         return s.outputs.atmos_corrected_reflectance_lambertian
 
-    def create_lut(self):
-        if self.metadata_filename in BOAReflectance.cache:
-            self.lut = BOAReflectance.cache[self.metadata_filename]
-            print("Got from cache")
-            return
-
+    def configure_sixs(self):
         s = SixS()
 
         str_timestamp = (self.metadata['PRODUCT_METADATA']['DATE_ACQUIRED'] +
                          " " +
                          self.metadata['PRODUCT_METADATA']['SCENE_CENTER_TIME'])
         timestamp = dateutil.parser.parse(str_timestamp)
-        print(timestamp)
+        logging.debug("Timestamp: %s", str(timestamp))
 
         lat = float(self.metadata['PRODUCT_METADATA']['CORNER_UL_LAT_PRODUCT'])
         lon = float(self.metadata['PRODUCT_METADATA']['CORNER_UL_LON_PRODUCT'])
-        print(lat, lon)
+        logging.debug("Latitude %f, Longitude %f", lat, lon)
 
         ozone = get_ozone_conc([lat], [lon], timestamp)
         # Assume no water content - won't affect visible bands anyway
         PWC = 0
 
-        print(ozone)
+        logging.debug("Ozone: %f", ozone)
         s.atmos_profile = AtmosProfile.UserWaterAndOzone(PWC, ozone / 1000)
 
         s.geometry = Geometry.Landsat_TM()
@@ -67,58 +63,105 @@ class BOAReflectance:
         s.altitudes.set_sensor_satellite_level()
         s.altitudes.set_target_sea_level()
 
-        radiances = np.arange(0, 300, 10)
+        return s
 
-        B1 = []
-        B2 = []
-        B3 = []
-        B4 = []
-        B5 = []
-        B7 = []
-
-        if self.metadata['PRODUCT_METADATA']['SENSOR_ID'].replace("\"", "") == 'TM':
-            print "Running as Landsat 5"
-            bands = [PredefinedWavelengths.LANDSAT_TM_B1,
-                     PredefinedWavelengths.LANDSAT_TM_B2,
-                     PredefinedWavelengths.LANDSAT_TM_B3,
-                     PredefinedWavelengths.LANDSAT_TM_B4,
-                     PredefinedWavelengths.LANDSAT_TM_B5,
-                     PredefinedWavelengths.LANDSAT_TM_B7]
-        else:
-            print "Running as Landsat 7"
+    def get_bands_for_sensor(self):
+        spacecraft_id = self.metadata['PRODUCT_METADATA']['SPACECRAFT_ID']
+        if '8' in spacecraft_id:
+            # Landsat 8
+            logging.info('Getting bands for Landsat 8')
+            bands = [PredefinedWavelengths.LANDSAT_OLI_B1,
+                     PredefinedWavelengths.LANDSAT_OLI_B2,
+                     PredefinedWavelengths.LANDSAT_OLI_B3,
+                     PredefinedWavelengths.LANDSAT_OLI_B4,
+                     PredefinedWavelengths.LANDSAT_OLI_B5,
+                     PredefinedWavelengths.LANDSAT_OLI_B6,
+                     PredefinedWavelengths.LANDSAT_OLI_B7,
+                     None,  # Panchromatic so ignore
+                     PredefinedWavelengths.LANDSAT_OLI_B9,
+                     None,  # Thermal so ignore
+                     None]  # Thermal so ignore
+        elif '7' in spacecraft_id:
+            # Landsat 7
+            logging.info('Getting bands for Landsat 7')
             bands = [PredefinedWavelengths.LANDSAT_ETM_B1,
                      PredefinedWavelengths.LANDSAT_ETM_B2,
                      PredefinedWavelengths.LANDSAT_ETM_B3,
                      PredefinedWavelengths.LANDSAT_ETM_B4,
                      PredefinedWavelengths.LANDSAT_ETM_B5,
-                     PredefinedWavelengths.LANDSAT_ETM_B7]
+                     None,  # Thermal so ignore
+                     PredefinedWavelengths.LANDSAT_ETM_B7,
+                     None]  # Panchromatic so ignore
+        elif '5' in spacecraft_id:
+            # Landsat 5
+            logging.info('Getting bands for Landsat 5')
+            bands = [PredefinedWavelengths.LANDSAT_TM_B1,
+                     PredefinedWavelengths.LANDSAT_TM_B2,
+                     PredefinedWavelengths.LANDSAT_TM_B3,
+                     PredefinedWavelengths.LANDSAT_TM_B4,
+                     PredefinedWavelengths.LANDSAT_TM_B5,
+                     None,  # Thermal so ignore
+                     PredefinedWavelengths.LANDSAT_TM_B7]
+        else:
+            # Unsupported Landsat version
+            raise ValueError('Unsupported Landsat satellite')
+
+        return bands
+
+    def create_lut(self):
+        if self.metadata_filename in BOAReflectance.cache:
+            self.lut = BOAReflectance.cache[self.metadata_filename]
+            logging.info("Got BOAReflectance LUT from cache")
+            return
+
+        # Configure the 6S model ready to create the LUT
+        s = self.configure_sixs()
+
+        radiances = np.arange(0, 300, 10)
+
+        bands = self.get_bands_for_sensor()
+
+        band_radiance_results = [[] for band in bands]
 
         for rad in radiances:
             print rad
-            B1.append(self._process_band(s, rad, bands[0]))
-            B2.append(self._process_band(s, rad, bands[1]))
-            B3.append(self._process_band(s, rad, bands[2]))
-            B4.append(self._process_band(s, rad, bands[3]))
-            B5.append(self._process_band(s, rad, bands[4]))
-            B7.append(self._process_band(s, rad, bands[5]))
+            for band_radiance_result, band in zip(band_radiance_results, bands):
+                if band is None:
+                    # We're ignoring this band for some reason
+                    band_radiance_result = None
+                    continue
+                band_radiance_result.append(self._process_band(s, rad, band))
 
-        B1 = np.array(B1)
-        B2 = np.array(B2)
-        B3 = np.array(B3)
-        B4 = np.array(B4)
-        B5 = np.array(B5)
-        B7 = np.array(B7)
+        band_radiance_results = [self._to_array_unless_none(x) for x in band_radiance_results]
 
-        self.lut = [None,
-                    interp1d(radiances * self.scale, B1, bounds_error=False),
-                    interp1d(radiances * self.scale, B2, bounds_error=False),
-                    interp1d(radiances * self.scale, B3, bounds_error=False),
-                    interp1d(radiances * self.scale, B4, bounds_error=False),
-                    interp1d(radiances * self.scale, B5, bounds_error=False),
-                    interp1d(radiances * self.scale, B7, bounds_error=False)]
+        print("Bands len %d" % len(bands))
+        print("band_rad_res len %d" % len(band_radiance_results))
+        print("band_rad_res[0] len %d" % band_radiance_results[0].shape)
+        print("radiances len %d" % len(radiances))
+
+        #self.lut = map(lambda x: self._create_interp(radiances, x), band_radiance_results)
+        self.lut = [self._create_interp(radiances, x) for x in band_radiance_results]
+        self.lut.insert(0, None)  # Add a blank one at the start because GDAL bands index from 1
 
         BOAReflectance.cache[self.metadata_filename] = self.lut
-        print("Created LUT")
+        logging.debug("LUT creation finished")
+
+    def _create_interp(self, radiances, band_radiance_result):
+        if band_radiance_result is None:
+            return None
+        else:
+            return interp1d(radiances * self.scale,
+                            band_radiance_result,
+                            bounds_error=False)
+
+    def _to_array_unless_none(self, data):
+        if data is None or len(data) == 0:
+            return None
+        else:
+            return np.array(data)
 
     def correct_band(self, arr, band):
-        return self.lut[band](arr)
+        if self.lut[band] is None:
+            return arr
+        else:
+            return self.lut[band](arr)
