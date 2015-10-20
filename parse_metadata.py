@@ -31,6 +31,7 @@ def parse_metadata(filename):
         else:
             # Actual data here - rather than group start or end
             label, data = (s.strip() for s in line.split("="))
-            group_metadata[label] = data
+            # Store data, after removing quotes if present
+            group_metadata[label] = data.replace('"', '')
 
     return metadata
