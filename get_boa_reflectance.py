@@ -9,6 +9,14 @@ import logging
 
 
 class BOAReflectance:
+    """
+    Calculates psuedo-Bottom-of-Atmosphere reflectance for pixels in a Landsat
+    scene (that is, BOA reflectance *without* taking into account aerosols).
+
+    Initialise by giving it the full path to a MTL file from a Landsat image,
+    and then run create_lut() to generate a lookup table, and then
+    correct_band() for every band you want to correct.
+    """
     cache = {}
 
     def __init__(self, metadata_fname, scale=1):
@@ -43,6 +51,8 @@ class BOAReflectance:
         logging.debug("Ozone: %f", ozone)
         s.atmos_profile = AtmosProfile.UserWaterAndOzone(PWC, ozone / 1000)
 
+        # Working on a Landsat TM geometry - nothing better available in 6S
+        # ASSUMPTION: Landsat ETM & OLI are basically the same as TM
         s.geometry = Geometry.Landsat_TM()
         s.geometry.latitude = lat
         s.geometry.longitude = lon
@@ -60,8 +70,6 @@ class BOAReflectance:
 
         # Set to have no aerosols
         s.aero_profile = AeroProfile.PredefinedType(AeroProfile.NoAerosols)
-        s.altitudes.set_sensor_satellite_level()
-        s.altitudes.set_target_sea_level()
 
         return s
 
@@ -169,6 +177,14 @@ class BOAReflectance:
             return np.array(data)
 
     def correct_band(self, arr, band):
+        """
+        Corrects the radiances in the array `arr` to pseudo-BOA reflectances
+        using the LUTs defined in this class (and calculated with create_lut).
+
+        Requires a band number, to be given as the 'true' band numbers, 1-based
+        (ie. B1 for Landsat TM/ETM is blue, B1 for Landsat OLI is 'Deep Blue'/
+        Aerosols
+        """
         if self.lut[band] is None:
             # No interpolation, so return NaNs
             new_arr = arr.copy()
