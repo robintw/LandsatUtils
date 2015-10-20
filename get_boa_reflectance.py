@@ -162,6 +162,9 @@ class BOAReflectance:
 
     def correct_band(self, arr, band):
         if self.lut[band] is None:
-            return arr
+            # No interpolation, so return NaNs
+            new_arr = arr.copy()
+            new_arr[:] = np.nan
+            return new_arr
         else:
             return self.lut[band](arr)
