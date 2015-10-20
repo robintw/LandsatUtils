@@ -108,6 +108,17 @@ class BOAReflectance:
 
         return bands
 
+    def get_radiances_for_sensor(self):
+        spacecraft_id = self.metadata['PRODUCT_METADATA']['SPACECRAFT_ID']
+        if '8' in spacecraft_id:
+            radiances = np.arange(0, 800, 10)
+        elif '7' in spacecraft_id or '5' in spacecraft_id:
+            radiances = np.arange(0, 300, 10)
+        else:
+            raise ValueError('Unsupported Landsat satellite')
+
+        return radiances
+
     def create_lut(self):
         if self.metadata_filename in BOAReflectance.cache:
             self.lut = BOAReflectance.cache[self.metadata_filename]
@@ -117,9 +128,9 @@ class BOAReflectance:
         # Configure the 6S model ready to create the LUT
         s = self.configure_sixs()
 
-        radiances = np.arange(0, 300, 10)
-
         bands = self.get_bands_for_sensor()
+
+        radiances = self.get_radiances_for_sensor()
 
         band_radiance_results = [[] for band in bands]
 
@@ -132,16 +143,13 @@ class BOAReflectance:
                     continue
                 band_radiance_result.append(self._process_band(s, rad, band))
 
-        band_radiance_results = [self._to_array_unless_none(x) for x in band_radiance_results]
+        band_radiance_results = [self._to_array_unless_none(x) for x in
+                                 band_radiance_results]
 
-        print("Bands len %d" % len(bands))
-        print("band_rad_res len %d" % len(band_radiance_results))
-        print("band_rad_res[0] len %d" % band_radiance_results[0].shape)
-        print("radiances len %d" % len(radiances))
-
-        #self.lut = map(lambda x: self._create_interp(radiances, x), band_radiance_results)
-        self.lut = [self._create_interp(radiances, x) for x in band_radiance_results]
-        self.lut.insert(0, None)  # Add a blank one at the start because GDAL bands index from 1
+        self.lut = [self._create_interp(radiances, x) for x in
+                    band_radiance_results]
+        # Add a blank one at the start because GDAL bands index from 1
+        self.lut.insert(0, None)
 
         BOAReflectance.cache[self.metadata_filename] = self.lut
         logging.debug("LUT creation finished")
