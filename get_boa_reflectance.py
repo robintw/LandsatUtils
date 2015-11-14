@@ -2,7 +2,7 @@ from LandsatUtils import parse_metadata
 from Py6S import *
 import numpy as np
 import dateutil
-from VanHOzone import get_ozone_conc
+from vanHOzone import get_ozone_conc
 from scipy.interpolate import interp1d
 from functools import wraps
 import logging
