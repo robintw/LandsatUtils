@@ -19,10 +19,13 @@ class BOAReflectance:
     """
     cache = {}
 
-    def __init__(self, metadata_fname, scale=1):
+    def __init__(self, metadata_fname, scale=1, nocache=True):
         self.metadata_filename = metadata_fname
         self.metadata = parse_metadata(metadata_fname)
         self.scale = scale
+
+        if nocache:
+            BOAReflectance.cache = {}
 
     def _process_band(self, s, radiance, wavelength):
         s.wavelength = Wavelength(wavelength)
@@ -143,7 +146,6 @@ class BOAReflectance:
         band_radiance_results = [[] for band in bands]
 
         for rad in radiances:
-            print rad
             for band_radiance_result, band in zip(band_radiance_results, bands):
                 if band is None:
                     # We're ignoring this band for some reason
