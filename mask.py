@@ -1,8 +1,8 @@
 import gdal
 
 
-def mask_all_bands(image_filename, mask_filename, output_filename,
-                   mask_value_to_delete=255, nodata=-9999):
+def mask_all_bands(image_filename, mask_filename, output_filename, mask_type='delete',
+                   mask_value=255, nodata=-9999):
     im = gdal.Open(image_filename)
     drv = gdal.GetDriverByName("GTiff")
     new_im = drv.CreateCopy(output_filename, im)
@@ -14,7 +14,10 @@ def mask_all_bands(image_filename, mask_filename, output_filename,
         band = new_im.GetRasterBand(i)
 
         band_data = band.ReadAsArray()
-        band_data[mask_band == mask_value_to_delete] = nodata
+        if mask_type == 'delete':
+            band_data[mask_band == mask_value] = nodata
+        elif mask_type == 'keep':
+            band_data[mask_band != mask_value] = nodata            
         band.WriteArray(band_data)
 
         del band
