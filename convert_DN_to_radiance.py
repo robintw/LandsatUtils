@@ -119,7 +119,7 @@ def create_radiance_image(rootname, outputname):
 
     drv = gdal.GetDriverByName('GTiff')
 
-    band1 = gdal.Open(rootname + "_B1.tif")
+    band1 = gdal.Open(rootname + "_B1.TIF")
 
     # Configure the output image
     output_image = drv.Create(outputname,
@@ -135,7 +135,7 @@ def create_radiance_image(rootname, outputname):
         # Extract the scaling factors
         scaling_mult, scaling_add = scaling_factors
 
-        filename = rootname + "_B%d.tif" % band_index
+        filename = rootname + "_B%d.TIF" % band_index
         if not os.path.exists(filename) and band_index == 6:
             # We're dealing with Landsat 5 or 7 with the silly VCID names
             filename = rootname + "_B6_VCID_1.TIF"
