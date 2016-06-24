@@ -3,8 +3,8 @@ import os
 from glob import glob
 from subprocess import call
 
-from convert_DN_to_radiance import create_radiance_image
-from mask import mask_all_bands
+from .convert_DN_to_radiance import create_radiance_image
+from .mask import mask_all_bands
 
 import logging
 

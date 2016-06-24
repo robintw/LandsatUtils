@@ -1,7 +1,7 @@
 import gdal
 import gdalconst
 import os
-from parse_metadata import parse_metadata
+from .parse_metadata import parse_metadata
 import logging
 
 def get_radiance_scaling(filename):
@@ -94,7 +94,7 @@ def get_radiance_scaling(filename):
         # Unsupported Landsat version
         raise ValueError('Unsupported Landsat satellite')
 
-    return map(float, radiance_mult), map(float, radiance_add)
+    return list(map(float, radiance_mult)), list(map(float, radiance_add))
 
 
 def create_radiance_image(rootname, outputname):
@@ -116,7 +116,6 @@ def create_radiance_image(rootname, outputname):
 
     # Get the radiance scaling factors
     radiance_mult, radiance_add = get_radiance_scaling(mtl_filename)
-
     drv = gdal.GetDriverByName('GTiff')
 
     band1 = gdal.Open(rootname + "_B1.TIF")
