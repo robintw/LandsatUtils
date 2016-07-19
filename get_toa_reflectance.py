@@ -1,7 +1,7 @@
 from .parse_metadata import parse_metadata
 import numpy as np
 import dateutil
-from PySun.sun import Sun
+from .sun import Sun
 
 
 class TOAReflectance:
