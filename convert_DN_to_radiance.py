@@ -3,6 +3,8 @@ import gdalconst
 import os
 from .parse_metadata import parse_metadata
 import logging
+from .tweak_images import generate_rad_scaling, fixMTL
+
 
 def get_radiance_scaling(filename):
     """Gets scaling factors to convert from DN to radiance for *all*
@@ -15,7 +17,11 @@ def get_radiance_scaling(filename):
 
     spacecraft_id = metadata['PRODUCT_METADATA']['SPACECRAFT_ID']
 
-    rad_scaling = metadata['RADIOMETRIC_RESCALING']
+    try:
+        rad_scaling = metadata['RADIOMETRIC_RESCALING']
+    except:
+        rad_scaling = generate_rad_scaling(filename)
+        fixMTL(filename, rad_scaling)
 
     if '8' in spacecraft_id:
         # Landsat 8

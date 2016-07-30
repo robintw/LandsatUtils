@@ -2,9 +2,11 @@ import tarfile
 import os
 from glob import glob
 from subprocess import call
+import re
 
 from .convert_DN_to_radiance import create_radiance_image
 from .mask import mask_all_bands
+from .tweak_images import tweak_rename
 
 import logging
 
@@ -15,12 +17,12 @@ def extract_and_process_uncorrected(uncorrected_fname, path=None,
     logging.basicConfig(format='%(asctime)s:%(levelname)s:%(message)s',
                         datefmt='%H:%M:%S',
                         level=logging.DEBUG)
-
+    regex = re.compile('.tar.+', re.IGNORECASE)
     if path is None:
-        path = uncorrected_fname.replace('.tar.gz', '')
+        path = regex.sub('', uncorrected_fname)
 
     logging.info("Processing image with scene ID = %s to %s",
-                 os.path.basename(uncorrected_fname).replace(".tar.gz", ""),
+                 regex.sub('', os.path.basename(uncorrected_fname)),
                  path)
 
     # Keep track of what the current working directory is, and change to the
@@ -28,15 +30,19 @@ def extract_and_process_uncorrected(uncorrected_fname, path=None,
     prev_working_dir = os.getcwd()
     if not os.path.exists(path):
         os.mkdir(path)
+        os.chdir(path)
+        # Extract the uncorrected .tar.gz file
+        tar = tarfile.open(uncorrected_fname)
+        logging.info("Extracting %s", uncorrected_fname)
+        tar.extractall(path)
+        logging.info("Extraction complete.")
+
     os.chdir(path)
 
-    # Extract the uncorrected .tar.gz file
-    tar = tarfile.open(uncorrected_fname)
-    logging.info("Extracting %s", uncorrected_fname)
-    tar.extractall(path)
-    logging.info("Extraction complete.")
+    rootname = regex.sub('', os.path.basename(uncorrected_fname))
 
-    rootname = os.path.basename(uncorrected_fname).replace(".tar.gz", "")
+    if len(os.listdir(path)[0].split('_')) > 2:
+        tweak_rename(rootname, path)
 
     logging.info("Merging uncorrected images")
     # Create a merged radiance image from the raw DN tif files
@@ -50,9 +56,10 @@ def extract_and_process(ledaps_fname, uncorrected_fname, path):
     logging.basicConfig(format='%(asctime)s:%(levelname)s:%(message)s',
                         datefmt='%H:%M:%S',
                         level=logging.DEBUG)
+    regex = re.compile('.tar.+', re.IGNORECASE)
 
     logging.info("Processing image with scene ID = %s to %s",
-                 os.path.basename(uncorrected_fname).replace(".tar.gz", ""),
+                 regex.sub('', os.path.basename(uncorrected_fname)),
                  path)
 
     # Keep track of what the current working directory is, and change to the
@@ -71,17 +78,17 @@ def extract_and_process(ledaps_fname, uncorrected_fname, path):
     tar.extractall(path)
     logging.info("Extraction complete.")
 
-    rootname = os.path.basename(uncorrected_fname).replace(".tar.gz", "")
+    rootname = regex.sub('', os.path.basename(uncorrected_fname)),
 
     logging.info("Merging uncorrected images")
     # Create a merged radiance image from the raw DN tif files
-    create_radiance_images(os.path.join(path, rootname),
-                           os.path.join(path,"Uncorrected_Merged.tif"))
+    create_radiance_image(os.path.join(path, rootname),
+                          os.path.join(path, "Uncorrected_Merged.tif"))
 
     logging.info("Extracting masks from LEDAPS file")
     # Extract the masks from the LEDAPS lndsr*.hdf file
     basename = os.path.basename(uncorrected_fname)
-    lndsr_file = os.path.join(path, "lndsr."+basename.replace(".tar.gz", ".hdf"))
+    lndsr_file = os.path.join(path, "lndsr." + regex.sub('.hdf', basename))
     command = "C:\\OSGeo4W\\bin\\gdal_translate.exe -of GTiff HDF4_EOS:EOS_GRID:\"%s\":Grid:land_water_QA %s" % (lndsr_file,
                             os.path.join(path, "WaterMask.tif"))
     logging.debug("Running command: %s", command)
