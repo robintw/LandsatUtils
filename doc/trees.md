@@ -22,7 +22,7 @@ LE71820292001120SGS00/
 0 directories, 12 files
 
 
-The MTL file for this image is porvided as [L71182029_02920010430_MTL_USGS.txt](L71182029_02920010430_MTL_USGS.txt)
+The MTL file for this image is porvided as [L71182029_02920010430_MTL_py.txt](L71182029_02920010430_MTL_py.txt)
 
 ------------------------------------------
 
@@ -44,4 +44,4 @@ LE71820292001120SGS00/
 
 0 directories, 12 files
 
-The MTL file for this image is porvided as [L71182029_02920010430_MTL_py.txt](L71182029_02920010430_MTL_py.txt)
+The MTL file for this image is porvided as [LE71820292001120SGS00_MTL_USGS.txt](LE71820292001120SGS00_MTL_USGS.txt)
