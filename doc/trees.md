@@ -1,9 +1,9 @@
-## This file was created to illustrate de difference between landsat images obtained by ID from different sources
+## This file was created to illustrate the difference between Landsat images obtained by the same ID from different sources
 
 
-### Image downloaded using landsat_utils python module
+### Image downloaded using the landsat_utils python module
 
-Note the different names from band B62 (L711XXX and L721XXX)
+Note the different names from band B62 onwards (L711XXX and L721XXX)
 
 LE71820292001120SGS00/  
 ├── L71182029_02920010430_B10.TIF  
@@ -22,7 +22,7 @@ LE71820292001120SGS00/
 0 directories, 12 files
 
 
-The MTL file for this image is porvided as [L71182029_02920010430_MTL_py.txt](L71182029_02920010430_MTL_py.txt)
+The MTL file for this image is provided as [L71182029_02920010430_MTL_py.txt](L71182029_02920010430_MTL_py.txt)
 
 ------------------------------------------
 
@@ -44,4 +44,4 @@ LE71820292001120SGS00/
 
 0 directories, 12 files
 
-The MTL file for this image is porvided as [LE71820292001120SGS00_MTL_USGS.txt](LE71820292001120SGS00_MTL_USGS.txt)
+The MTL file for this image is provided as [LE71820292001120SGS00_MTL_USGS.txt](LE71820292001120SGS00_MTL_USGS.txt)
