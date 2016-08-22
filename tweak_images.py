@@ -6,7 +6,10 @@ from .parse_metadata import parse_metadata
 
 
 def fixMTL(filename, rad_scaling):
-    id_ = filename.split('/')[-2]
+    try:
+        id_ = filename.split('/')[-2]
+    except:
+        id_ = filename.split('\\')[-2]  # Fix for Windows
     to_replace = {
         'ACQUISITION_DATE': 'DATE_ACQUIRED',
         'Landsat7': 'LANDSAT_7',
