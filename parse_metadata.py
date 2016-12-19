@@ -34,4 +34,5 @@ def parse_metadata(filename):
             # Store data, after removing quotes if present
             group_metadata[label] = data.replace('"', '')
 
+    f.close()
     return metadata

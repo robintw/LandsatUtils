@@ -3,16 +3,19 @@ import os
 from glob import glob
 from subprocess import call
 import re
+from shutil import copytree
 
 from .convert_DN_to_radiance import create_radiance_image
 from .mask import mask_all_bands
 from .tweak_images import tweak_rename
+from .clip_images import clip_images
 
 import logging
 
 
 def extract_and_process_uncorrected(uncorrected_fname, path=None,
-                                    output_name="Uncorrected_Merged.tif"):
+                                    output_name="Uncorrected_Merged.tif",
+                                    clip_coords=None, clip_val=None):
 
     logging.basicConfig(format='%(asctime)s:%(levelname)s:%(message)s',
                         datefmt='%H:%M:%S',
@@ -43,6 +46,19 @@ def extract_and_process_uncorrected(uncorrected_fname, path=None,
 
     if len(os.listdir(path)[0].split('_')) > 2:
         tweak_rename(rootname, path)
+
+    if clip_coords:
+        logging.info('Clipping images')
+        i = 1
+        while True:
+            if os.path.exists(path + '_clipped%d' % i):
+                i += 1
+                continue
+            else:
+                new_path = path + '_clipped%d' % i
+                copytree(path, new_path)
+                break
+        clip_images(new_path, clip_coords, clip_val)
 
     logging.info("Merging uncorrected images")
     # Create a merged radiance image from the raw DN tif files
